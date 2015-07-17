@@ -1,19 +1,23 @@
 <div class="padding" ng-controller="StartController">
-
+<!--
   <super-navbar>
     <super-navbar-title>
       Hellow - View A
     </super-navbar-title>
   </super-navbar>
-
+-->
 
   <div id="viewA">
     <h2>I'm view A</h2>
 
-    <button ng-click="pushView()" class="button button-block button-positive icon-left super-wand">In Place Transitions</button>
+    <button ng-click="pushView()" class="button button-block button-positive icon-left super-wand">
+      View B
+    </button>
 
     <super-navigate location="http://localhost/app/example/getting-started.html#newStuff">
-      <button class="button button-block button-positive icon-left super-university">Push Another Copy of Me ;-)</button>
+      <button class="button button-block button-positive icon-left super-university">
+        Push Another Copy A
+      </button>
     </super-navigate>
 
     <super-navigate view-id="learn-more">
@@ -27,7 +31,10 @@
     <button ng-click="popView()" class="button button-block button-positive icon-left super-wand">Go Back</button>
 
     <super-navigate location="http://localhost/app/example/getting-started.html#newStuff">
-      <button class="button button-block button-positive icon-left super-university">Push Another Copy of Me ;-)</button>
+      <button class="button button-block button-positive icon-left super-university">Push Another Copy A</button>
     </super-navigate>
   </div>
+
+  <button ng-click="addButton()" class="button button-block button-positive icon-left super-wand">Add Button</button>
+
 </div>

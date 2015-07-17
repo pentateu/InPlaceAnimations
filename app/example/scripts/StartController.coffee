@@ -6,8 +6,10 @@ angular
 
     viewBNavBar = ->
       homeButton = new steroids.buttons.NavigationBarButton
-      homeButton.imagePath = "/icons/home.svg"
+      #homeButton.imagePath = "/icons/home.svg"
+      homeButton.title = "..."
       homeButton.onTap = => navigator.notification.alert "Go Home!"
+      
       {
         title: "Second View (B)"
         buttons:
@@ -24,7 +26,7 @@ angular
 
       if event.type == "pop"
         removeStaticContainer()
-      
+
     removeStaticContainer = ->
       setTimeout ->
         steroids.transitions.removeStaticContainer {},
@@ -63,6 +65,18 @@ angular
 
         ,
         onFailure: -> console.log "%%%% popView() onFailure()"
+
+
+    $scope.addButton = ->
+      button = new steroids.buttons.NavigationBarButton
+      button.title = "TEST"
+      button.onTap = => navigator.notification.alert "RIGHT BUTTON TAPPED"
+
+      steroids.view.navigationBar.setButtons {
+        right: [button]
+      },
+        onSuccess: => steroids.logger.log "SUCCESS in setting one button into nav bar (legacy)"
+        onFailure: => navigator.notification.alert "FAILURE in testSetButtonsWithOneRightButton (legacy)"
 
     $scope.pushView = ->
 
