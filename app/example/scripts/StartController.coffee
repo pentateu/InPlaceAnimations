@@ -9,23 +9,31 @@ angular
       #homeButton.imagePath = "/icons/home.svg"
       homeButton.title = "..."
       homeButton.onTap = => navigator.notification.alert "Go Home!"
-      
+
       {
         title: "Second View (B)"
         buttons:
           right: [homeButton]
       }
 
-    #im using the willchange event to know when to change views
-    # and remove the static container
-    eventHandler = steroids.layers.on 'willchange', (event) ->
+    updateView = ->
       if displayedView == "A"
-        showViewB()
-      else
         showViewA()
+      else
+        showViewB()
 
-      if event.type == "pop"
-        removeStaticContainer()
+    listenLayersEvents = ->
+      console.log "%%%% listenLayersEvents()"
+      #im using the willchange event to know when to change views
+      # and remove the static container
+      eventHandler = steroids.layers.on 'willchange', (event) ->
+        console.log "%%%% layers.on willchange -> event.type: #{event.type}"
+        updateView()
+
+        if event.type == "pop"
+          removeStaticContainer()
+
+        steroids.layers.off 'willchange', eventHandler
 
     removeStaticContainer = ->
       setTimeout ->
@@ -36,12 +44,12 @@ angular
 
     displayedView = "A"
     showViewA = ->
-      displayedView = "A"
+      console.log "%%%% showViewA()"
       $("#viewA").classList.remove('hidden')
       $("#viewB").classList.add('hidden')
 
     showViewB = ->
-      displayedView = "B"
+      console.log "%%%% showViewB()"
       $("#viewA").classList.add('hidden')
       $("#viewB").classList.remove('hidden')
 
@@ -58,14 +66,11 @@ angular
 
           #Do the UI changes in the webview while it is still covered by the
           #"static container"
-          showViewA()
-
-          ##remove the static copy of the Container
-          #removeStaticContainer()
+          displayedView = "A"
+          updateView()
 
         ,
         onFailure: -> console.log "%%%% popView() onFailure()"
-
 
     $scope.addButton = ->
       button = new steroids.buttons.NavigationBarButton
@@ -77,6 +82,9 @@ angular
       },
         onSuccess: => steroids.logger.log "SUCCESS in setting one button into nav bar (legacy)"
         onFailure: => navigator.notification.alert "FAILURE in testSetButtonsWithOneRightButton (legacy)"
+
+    $scope.testLog = ->
+      console.log "%%%% testLog()"
 
     $scope.pushView = ->
 
@@ -94,10 +102,14 @@ angular
           console.log "%%%% pushView() onSuccess()"
 
           #change the UI while the loading view is being displayed
-          showViewB()
+          displayedView = "B"
+          updateView()
+
+          listenLayersEvents()
 
           ##remove the loading
           setTimeout ->
+            displayedView = "A"
             steroids.view.removeLoading()
           , 1000
 
