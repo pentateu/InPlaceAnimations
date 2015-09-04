@@ -4,6 +4,8 @@ angular
 
     $ = (query) -> document.querySelector(query)
 
+    myUUID = null
+
     viewBNavBar = ->
       homeButton = new steroids.buttons.NavigationBarButton
       #homeButton.imagePath = "/icons/home.svg"
@@ -18,29 +20,50 @@ angular
 
     updateView = ->
       if displayedView == "A"
+        console.log "%%%% displayedView - will show A"
         showViewA()
       else
+        console.log "%%%% displayedView - will show B"
         showViewB()
 
+
+    ###
+    steroids.layers.on 'willchange', (event) ->
+      console.log "%%%% willchange - event event.type: #{JSON.stringify(event.type)}"
+
+    steroids.layers.on 'didchange', (event) ->
+      console.log "%%%% didchange - event event.type: #{JSON.stringify(event.type)}"
+    ###
+
+    isMyEvent = (event) -> event.type.indexOf("Transition") > -1 && event.target.webview.uuid == myUUID
+
     listenLayersEvents = ->
-      console.log "%%%% listenLayersEvents()"
+      console.log "%%%% listen to layer will change"
       #im using the willchange event to know when to change views
       # and remove the static container
       eventHandler = steroids.layers.on 'willchange', (event) ->
-        console.log "%%%% layers.on willchange -> event.type: #{event.type}"
+        console.log "%%%% layers.on willchange -> event.type: #{JSON.stringify(event.type)}"
+        return unless isMyEvent event
+
+        console.log "%%%% layers.on willchange -> IT IS ME :)"
         updateView()
 
-        if event.type == "pop"
+        if event.type == "Transition-Pop"
           removeStaticContainer()
 
         steroids.layers.off 'willchange', eventHandler
 
     removeStaticContainer = ->
-      setTimeout ->
+      console.log "%%%% listen to layer did change"
+      eventHandler = steroids.layers.on 'didchange', (event) ->
+        console.log "%%%% layers.on didchange -> event.type: #{JSON.stringify(event.type)}"
+        return unless isMyEvent event
+
         steroids.transitions.removeStaticContainer {},
           onSuccess: -> console.log "%%%% removeStaticContainer -> onSuccess()"
-          onFailure: -> console.log "%%%% removeStaticContainer -> onFailure()"
-      , 1000
+          onFailure: (error) -> console.log "%%%% removeStaticContainer -> onFailure() error: #{JSON.stringify(error)}"
+
+        steroids.layers.off 'didchange', eventHandler
 
     displayedView = "A"
     showViewA = ->
@@ -77,8 +100,9 @@ angular
       button.title = "TEST"
       button.onTap = => navigator.notification.alert "RIGHT BUTTON TAPPED"
 
-      steroids.view.navigationBar.setButtons {
-        right: [button]
+      steroids.view.navigationBar.update {
+        buttons:
+          right: [button]
       },
         onSuccess: => steroids.logger.log "SUCCESS in setting one button into nav bar (legacy)"
         onFailure: => navigator.notification.alert "FAILURE in testSetButtonsWithOneRightButton (legacy)"
@@ -98,8 +122,10 @@ angular
         navigationBar:viewBNavBar()
 
       steroids.transitions.push params,
-        onSuccess: ->
-          console.log "%%%% pushView() onSuccess()"
+        onSuccess: (webviewInfo)->
+          console.log "%%%% pushView() onSuccess() - webviewInfo: #{JSON.stringify(webviewInfo)}"
+
+          myUUID = webviewInfo.uuid
 
           #change the UI while the loading view is being displayed
           displayedView = "B"
